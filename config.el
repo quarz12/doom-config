@@ -79,7 +79,26 @@
 (setq-default vterm-shell "/bin/fish")
 (setq-default explicit-shell-file-name "/bin/fish")
 (cua-mode 1) ; normal copy/ cut/ paste
-(setq doom-leader-alt-key "M-SPC") ; use alt + space as leader
+(setq visible-bell 1) ; disable error sound
+(add-to-list 'default-frame-alist
+             '(font . "JetBrains Mono-15"))
+(use-package ligature
+  :load-path "~/.emacs.d/includes"
+  :config
+  (ligature-set-ligatures 't '("--" "---" "==" "===" "!=" "!==" "=!="
+                              "=:=" "=/=" "<=" ">=" "&&" "&&&" "&=" "++" "+++" "***" ";;" "!!"
+                              "??" "???" "?:" "?." "?=" "<:" ":<" ":>" ">:" "<:<" "<>" "<<<" ">>>"
+                              "<<" ">>" "||" "-|" "_|_" "|-" "||-" "|=" "||=" "##" "###" "####"
+                              "#{" "#[" "]#" "#(" "#?" "#_" "#_(" "#:" "#!" "#=" "^=" "<$>" "<$"
+                              "$>" "<+>" "<+" "+>" "<*>" "<*" "*>" "</" "</>" "/>" "<!--" "<#--"
+                              "-->" "->" "->>" "<<-" "<-" "<=<" "=<<" "<<=" "<==" "<=>" "<==>"
+                              "==>" "=>" "=>>" ">=>" ">>=" ">>-" ">-" "-<" "-<<" ">->" "<-<" "<-|"
+                              "<=|" "|=>" "|->" "<->" "<~~" "<~" "<~>" "~~" "~~>" "~>" "~-" "-~"
+                              "~@" "[||]" "|]" "[|" "|}" "{|" "[<" ">]" "|>" "<|" "||>" "<||"
+                              "|||>" "<|||" "<|>" "..." ".." ".=" "..<" ".?" "::" ":::" ":=" "::="
+                              ":?" ":?>" "//" "///" "/*" "*/" "/=" "//=" "/==" "@_" "__" "???"
+                              "<:<" ";;;"))
+  (global-ligature-mode t)) ; connected symbols
 (map! "C-l" #'mc/vertical-align-with-space) ; multicursor align
 (global-set-key (kbd "M-SPC") ctl-x-map)
 (use-package multiple-cursors-core
