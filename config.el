@@ -106,12 +106,61 @@
                  ("C-<return>" . multiple-cursors-mode))) ; multicursor use enter for newline, ctrl + g to exit
 (setq confirm-kill-emacs nil)
 (setq doom-theme 'doom-dark+)
-
+(setq tab-width 4)
+(setq indent-tabs-mode nil) ;never use tabs
 ;; keybinds
-(map! :map eglot-mode-map
-      "C-M-l" #'eglot-format) ; format file with lsp
 (map!
- ;; "<tab>" #'indent-for-tab-command
- ;; "<backtab>" #'indent-for-tab-command
- "C-#" #'comment-line
+    "C-#" #'comment-line                       ; comment line(s)
+    "C-M-l" #'eglot-format                     ; format file with lsp
+    "<backtab>" #'my-indent-rigidly            ; enter shifting mode
+    "C-M-d" #'+lookup/definition               ; jump to definition
+    "C-M-i" #'+lookup/implementations          ; jump to implementation
+    "C-M-u" #'+lookup/references               ; jump to usages
+    ;; "M-,"                                   ; jump backwards
+    ;; "C-M-,"                                 ; jump forwards
+    "C-M-l" #'format-or-indent-region          ; format using eglot, fallback to autoindent
+    "M-S-<up>" #'mc/mark-previous-like-this    ; add a cursor above or at the previous match of the selection
+    "M-S-<down>" #'mc/mark-next-like-this      ; add a cursor below or at the next match of the selection
+    ;; "C-g"                                   ; exit multicursor mode
+    "M-<down-mouse-1>" #'mc/add-cursor-on-click; add cursor at clicked position
+    "C-s" #'save-buffer                        ; save file
+    "C-f" #'+default/search-buffer             ; search in file
+
  )
+(after! corfu
+  (map! :map corfu-map
+        [escape] #'corfu-quit))                ; let ESC close the corfu popup
+
+
+;; helper functions
+(defun format-or-indent-region (beg end)
+  "Format the region with Eglot, falling back to `indent-region'.
+
+Use Eglot's formatter when an Eglot server is active in the current
+buffer. Otherwise, indent the selected region using the current
+major mode's indentation rules."
+  (interactive "r")
+  (if (and (bound-and-true-p eglot--managed-mode)
+           (eglot-current-server))
+      (eglot-format beg end)
+    (indent-region beg end)))
+
+(defun my-indent-rigidly ()
+    "Enter `indent-rigidly' shifting mode for all selected lines."
+    (interactive)
+    (let ((beg (save-excursion
+                   (goto-char (region-beginning))
+                   (line-beginning-position)))
+             (end (save-excursion
+                      (goto-char (region-end))
+                      (line-end-position))))
+        (set-mark end)
+        (goto-char beg)
+        (call-interactively #'indent-rigidly)))
+
+(defun my-mc-normal-click (event)
+  "Remove all multicursors and perform a normal mouse click."
+  (interactive "e")
+  (when (bound-and-true-p multiple-cursors-mode)
+    (mc/keyboard-quit))
+  (mouse-set-point event))
