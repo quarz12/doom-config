@@ -1,0 +1,3 @@
+doom sync
+link .clang-format + .editorconfig into home dir
+systemctl --user enable emacs

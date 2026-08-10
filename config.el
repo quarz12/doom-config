@@ -113,16 +113,24 @@
 (setq doom-theme 'doom-dark+)
 (setq tab-width 4)
 (setq indent-tabs-mode nil) ; never use tabs
-(treemacs)
+(treemacs)  ; enable file tree
 (setq treemacs-fixed-width 0) ; allow resizing
-(treemacs-git-mode 'deferred)
-(treemacs-follow-mode 1)
+(treemacs-git-mode 'deferred) ; mark changed files
+(treemacs-follow-mode 1)    ; highlight active file in tree
 (treemacs-fringe-indicator-mode 'always) ; highlight | bar left of selected file
 (treemacs-filewatch-mode 1) ; update the filetree when new files are created/renamed
-
+(setq treemacs-width 25)
+(global-visual-line-mode t)    ; word wrap mode
 
 (minimap-mode 1)
 (setq minimap-window-location 'right) ; minimap
+(setq minimap-minimum-width 10)
+(setq minimap-width-fraction 0.1)
+
+(after! magit
+  (add-hook 'magit-mode-hook
+            (lambda ()
+              (display-line-numbers-mode -1)))) ; disable line numbers in magit, they are buggy
 
 ;; keybinds
 
