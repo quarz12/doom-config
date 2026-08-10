@@ -53,3 +53,6 @@
 ;; (unpin! t)
 (package! yaml-mode)
 (package! minimap)
+(package! dimmer)
+(package! lsp-treemacs)
+(package! git-timemachine)

@@ -119,18 +119,24 @@
 (treemacs-follow-mode 1)    ; highlight active file in tree
 (treemacs-fringe-indicator-mode 'always) ; highlight | bar left of selected file
 (treemacs-filewatch-mode 1) ; update the filetree when new files are created/renamed
+(with-eval-after-load 'treemacs
+  (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action)) ; single click to open file
 (setq treemacs-width 25)
 (global-visual-line-mode t)    ; word wrap mode
 
-(minimap-mode 1)
 (setq minimap-window-location 'right) ; minimap
 (setq minimap-minimum-width 10)
 (setq minimap-width-fraction 0.1)
 
+(dimmer-mode t) ; dim unfocused windows
 (after! magit
   (add-hook 'magit-mode-hook
             (lambda ()
               (display-line-numbers-mode -1)))) ; disable line numbers in magit, they are buggy
+(after! treemacs
+  (add-hook 'treemacs-mode-hook
+            (lambda ()
+              (display-line-numbers-mode -1))))
 
 ;; keybinds
 
@@ -158,6 +164,8 @@
     "C--" #'+fold/close                        ; fold
     "C-*" #'+fold/open-all                     ; C-S-+ unfold all
     "C-_" #'+fold/close-all                    ; C-S-- fold all
+    "S-<right>" #'split-window-horizontally    ; split window horizontally
+    "C-w" nil                                  ; disable C-w binding (deletes all above)
     )
 (map!
   :map undo-fu-mode-map
