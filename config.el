@@ -82,7 +82,10 @@
 (cua-mode 1) ; normal copy/ cut/ paste
 (setq visible-bell 1) ; disable error sound
 (add-to-list 'default-frame-alist
-             '(font . "JetBrains Mono-15"))
+    '(font . "JetBrains Mono-15"))
+
+;; package installs
+(setq use-package-always-ensure t) ; always install missing packages
 (use-package ligature
   :load-path "~/.emacs.d/includes"
   :config
@@ -102,14 +105,30 @@
   (global-ligature-mode t)) ; connected symbols
 (use-package multiple-cursors-core
   :bind    (:map mc/keymap
-                 ("<return>" . nil)
-                 ("C-<return>" . multiple-cursors-mode))) ; multicursor use enter for newline, ctrl + g to exit
+                 ("<return>" . nil))) ; multicursor use enter for newline, ctrl + g to exit
+
+;; themes/configs?
+
 (setq confirm-kill-emacs nil)
 (setq doom-theme 'doom-dark+)
 (setq tab-width 4)
-(setq indent-tabs-mode nil) ;never use tabs
+(setq indent-tabs-mode nil) ; never use tabs
+(treemacs)
+(setq treemacs-fixed-width 0) ; allow resizing
+(treemacs-git-mode 'deferred)
+(treemacs-follow-mode 1)
+(treemacs-fringe-indicator-mode 'always) ; highlight | bar left of selected file
+(treemacs-filewatch-mode 1) ; update the filetree when new files are created/renamed
+
+
+(minimap-mode 1)
+(setq minimap-window-location 'right) ; minimap
+
 ;; keybinds
-(map!
+
+(map! :g ;;NOTE commented lines are defaults
+    "C-y" #'undo-fu-only-redo                  ; C-y redo
+    "C-a" #'mark-whole-buffer                  ; select the whole file
     "C-#" #'comment-line                       ; comment line(s)
     "C-M-l" #'eglot-format                     ; format file with lsp
     "<backtab>" #'my-indent-rigidly            ; enter shifting mode
@@ -125,12 +144,25 @@
     "M-<down-mouse-1>" #'mc/add-cursor-on-click; add cursor at clicked position
     "C-s" #'save-buffer                        ; save file
     "C-f" #'+default/search-buffer             ; search in file
-
- )
+    "C-p" #'treemacs-projectile                ; open sidebar (project)
+    "C-d" #'treemacs-select-directory          ; open sidebar (directory)
+    "C-+" #'+fold/open                         ; unfold
+    "C--" #'+fold/close                        ; fold
+    "C-*" #'+fold/open-all                     ; C-S-+ unfold all
+    "C-_" #'+fold/close-all                    ; C-S-- fold all
+    )
+(map!
+  :map undo-fu-mode-map
+  "C-_" #'+fold/close-all) ; this mode otherwise blocks the keybind
+(map!
+    :map +dashboard-mode-map
+  "C-p" #'treemacs-projectile) ; another one
 (after! corfu
   (map! :map corfu-map
         [escape] #'corfu-quit))                ; let ESC close the corfu popup
-
+(with-eval-after-load 'treemacs
+    (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action) ; treemacs fold/unfold in one click
+    (treemacs-follow-mode))                                                        ; highlight the current file in tree
 
 ;; helper functions
 (defun format-or-indent-region (beg end)
