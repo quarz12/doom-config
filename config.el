@@ -113,7 +113,22 @@
 (setq doom-theme 'doom-dark+)
 (setq tab-width 4)
 (setq indent-tabs-mode nil)                      ; never use tabs
-(add-hook 'window-setup-hook #'treemacs 'append) ; enable file tree
+(projectile-mode 1)
+(projectile-load-known-projects)
+(defun my/open-treemacs-safely ()
+  "Open treemacs in the selected frame unless it's already visible there."
+  (unless (treemacs-get-local-window)
+    (treemacs)))
+(if (daemonp)
+    (progn
+      (add-hook 'emacs-startup-hook
+                (lambda ()
+                  (require 'treemacs)
+                  (require 'treemacs-projectile nil t)))
+      (add-hook 'server-after-make-frame-hook
+                (lambda ()
+                  (run-with-timer 0.05 nil #'my/open-treemacs-safely))))
+  (add-hook 'window-setup-hook #'treemacs))      ; enable file tree,
 (after! treemacs
     (setq treemacs-fixed-width 0)                ; allow resizing
     (treemacs-git-mode 'deferred)                ; mark changed files
@@ -286,9 +301,19 @@ major mode's indentation rules."
   (mapc #'delete-overlay my-region-whitespace-overlays)
   (setq my-region-whitespace-overlays nil))
 
+(defvar my-region-whitespace-clear-commands
+  '(kill-ring-save
+    kill-region
+    clipboard-kill-ring-save
+    cua-copy-region
+    cua-cut-region)
+  "Commands after which whitespace-dot overlays should stay hidden,
+even if the region remains active.")
+
 (defun my-region-whitespace-refresh ()
   (my-region-hide-whitespace)
-  (my-region-show-whitespace))
+  (unless (memq this-command my-region-whitespace-clear-commands)
+    (my-region-show-whitespace)))
 
 (add-hook 'post-command-hook #'my-region-whitespace-refresh)
 ;; end whitespace visualizer
