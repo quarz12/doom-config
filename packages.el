@@ -58,3 +58,4 @@
 (package! git-timemachine)
 (package! treemacs-tab-bar)
 (package! treemacs-magit)
+(package! idle-highlight-mode)

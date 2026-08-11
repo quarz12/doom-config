@@ -168,7 +168,9 @@
               (display-line-numbers-mode -1))))
 (setq auto-save-visited-interval 2)
 (auto-save-visited-mode 1)  ; autosave after 2 seconds
-
+(idle-highlight-global-mode)
+(custom-set-faces
+    '(idle-highlight ((t (:background "#3a3a3a"))))) ; make the highlight lighter
 
 ;; keybinds
 
