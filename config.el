@@ -112,18 +112,23 @@
 (setq confirm-kill-emacs nil)
 (setq doom-theme 'doom-dark+)
 (setq tab-width 4)
-(setq indent-tabs-mode nil) ; never use tabs
-(treemacs)  ; enable file tree
-(setq treemacs-fixed-width 0) ; allow resizing
-(treemacs-git-mode 'deferred) ; mark changed files
-(treemacs-follow-mode 1)    ; highlight active file in tree
-(treemacs-fringe-indicator-mode 'always) ; highlight | bar left of selected file
-(treemacs-filewatch-mode 1) ; update the filetree when new files are created/renamed
-(with-eval-after-load 'treemacs
-  (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action)) ; single click to open file
-(setq treemacs-width 25)
+(setq indent-tabs-mode nil)                      ; never use tabs
+(add-hook 'window-setup-hook #'treemacs 'append) ; enable file tree
+(after! treemacs
+    (setq treemacs-fixed-width 0)                ; allow resizing
+    (treemacs-git-mode 'deferred)                ; mark changed files
+    (treemacs-follow-mode 1)                     ; highlight active file in tree
+    (treemacs-fringe-indicator-mode 'always)     ; highlight | bar left of selected file
+    (treemacs-filewatch-mode 1)                  ; update the filetree when new files are created/renamed
+    (with-eval-after-load 'treemacs
+        (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action)) ; single click to open file
+    (setq treemacs-width 25)
+)
 (global-visual-line-mode t)    ; word wrap mode
+(setq-default show-trailing-whitespace t)
 
+;; TODO minimap causes cursor and statusbar flickers when swapping between multiple windows
+(minimap-mode 1)
 (setq minimap-window-location 'right) ; minimap
 (setq minimap-minimum-width 10)
 (setq minimap-width-fraction 0.1)
@@ -137,35 +142,40 @@
   (add-hook 'treemacs-mode-hook
             (lambda ()
               (display-line-numbers-mode -1))))
+(setq auto-save-visited-interval 2)
+(auto-save-visited-mode 1)  ; autosave after 2 seconds
 
 ;; keybinds
 
 (map! :g ;;NOTE commented lines are defaults
-    "C-y" #'undo-fu-only-redo                  ; C-y redo
-    "C-a" #'mark-whole-buffer                  ; select the whole file
-    "C-#" #'comment-line                       ; comment line(s)
-    "C-M-l" #'eglot-format                     ; format file with lsp
-    "<backtab>" #'my-indent-rigidly            ; enter shifting mode
-    "C-M-d" #'+lookup/definition               ; jump to definition
-    "C-M-i" #'+lookup/implementations          ; jump to implementation
-    "C-M-u" #'+lookup/references               ; jump to usages
-    ;; "M-,"                                   ; jump backwards
-    ;; "C-M-,"                                 ; jump forwards
-    "C-M-l" #'format-or-indent-region          ; format using eglot, fallback to autoindent
-    "M-S-<up>" #'mc/mark-previous-like-this    ; add a cursor above or at the previous match of the selection
-    "M-S-<down>" #'mc/mark-next-like-this      ; add a cursor below or at the next match of the selection
-    ;; "C-g"                                   ; exit multicursor mode
-    "M-<down-mouse-1>" #'mc/add-cursor-on-click; add cursor at clicked position
-    "C-s" #'save-buffer                        ; save file
-    "C-f" #'+default/search-buffer             ; search in file
-    "C-p" #'treemacs-projectile                ; open sidebar (project)
-    "C-d" #'treemacs-select-directory          ; open sidebar (directory)
-    "C-+" #'+fold/open                         ; unfold
-    "C--" #'+fold/close                        ; fold
-    "C-*" #'+fold/open-all                     ; C-S-+ unfold all
-    "C-_" #'+fold/close-all                    ; C-S-- fold all
-    "S-<right>" #'split-window-horizontally    ; split window horizontally
-    "C-w" nil                                  ; disable C-w binding (deletes all above)
+    "C-y" #'undo-fu-only-redo                     ; C-y redo
+    "C-a" #'mark-whole-buffer                     ; select the whole file
+    "C-#" #'comment-line                          ; comment line(s)
+    "C-M-l" #'eglot-format                        ; format file with lsp
+    "<backtab>" #'my-indent-rigidly               ; enter shifting mode
+    "C-M-d" #'+lookup/definition                  ; jump to definition
+    "C-M-i" #'+lookup/implementations             ; jump to implementation
+    "C-M-u" #'+lookup/references                  ; jump to usages
+    ;; "M-,"                                      ; jump backwards
+    ;; "C-M-,"                                    ; jump forwards
+    "C-M-l" #'format-or-indent-region             ; format using eglot, fallback to autoindent
+    "M-S-<up>" #'mc/mark-previous-like-this       ; add a cursor above or at the previous match of the selection
+    "M-S-<down>" #'mc/mark-next-like-this         ; add a cursor below or at the next match of the selection
+    ;; "C-g"                                      ; exit multicursor mode
+    "M-<down-mouse-1>" #'mc/add-cursor-on-click   ; add cursor at clicked position
+    "C-s" #'save-buffer                           ; save file
+    "C-f" #'+default/search-buffer                ; search in file
+    "C-p" #'treemacs-projectile                   ; open sidebar (project)
+    "C-d" #'treemacs-select-directory             ; open sidebar (directory)
+    "C-+" #'+fold/open                            ; unfold
+    "C--" #'+fold/close                           ; fold
+    "C-*" #'+fold/open-all                        ; C-S-+ unfold all
+    "C-_" #'+fold/close-all                       ; C-S-- fold all
+    "S-<right>" #'split-window-horizontally       ; split window horizontally
+    "C-w" nil                                     ; disable C-w binding (deletes all above)
+    "M-a" #'my-align-regexp                       ; align chars in selection
+    "M-d" #'+lookup/documentation                 ; open new buffer with documentation of current symbol
+    "M-g" #'magit                                 ; open magit
     )
 (map!
   :map undo-fu-mode-map
@@ -206,9 +216,51 @@ major mode's indentation rules."
         (goto-char beg)
         (call-interactively #'indent-rigidly)))
 
-(defun my-mc-normal-click (event)
+(defun my-align-regexp ()
+    "Enter `align-regexp'  mode for all selected lines."
+    (interactive)
+    (let ((beg (save-excursion
+                   (goto-char (region-beginning))
+                   (line-beginning-position)))
+             (end (save-excursion
+                      (goto-char (region-end))
+                      (line-end-position))))
+        (set-mark end)
+        (goto-char beg)
+        (call-interactively #'align-regexp)))
+
+(defun my-mc-normal-click (event) ;; TODO currently unused, kind of broken
   "Remove all multicursors and perform a normal mouse click."
   (interactive "e")
   (when (bound-and-true-p multiple-cursors-mode)
     (mc/keyboard-quit))
-  (mouse-set-point event))
+    (mouse-set-point event))
+
+(defvar-local my-region-whitespace-overlays nil)
+
+;; whitespace visualizer
+(defun my-region-show-whitespace ()
+  (when (use-region-p)
+    (let ((beg (region-beginning))
+          (end (region-end)))
+      (save-excursion
+        (goto-char beg)
+        (while (re-search-forward " +" end t)
+          (let* ((mbeg (match-beginning 0))
+                 (mend (match-end 0))
+                 (len (- mend mbeg))
+                 (ov (make-overlay mbeg mend)))
+            (overlay-put ov 'display (make-string len ?·))
+            (overlay-put ov 'evaporate t)
+            (push ov my-region-whitespace-overlays)))))))
+
+(defun my-region-hide-whitespace ()
+  (mapc #'delete-overlay my-region-whitespace-overlays)
+  (setq my-region-whitespace-overlays nil))
+
+(defun my-region-whitespace-refresh ()
+  (my-region-hide-whitespace)
+  (my-region-show-whitespace))
+
+(add-hook 'post-command-hook #'my-region-whitespace-refresh)
+;; end whitespace visualizer

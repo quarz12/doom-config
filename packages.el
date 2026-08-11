@@ -56,3 +56,5 @@
 (package! dimmer)
 (package! lsp-treemacs)
 (package! git-timemachine)
+(package! treemacs-tab-bar)
+(package! treemacs-magit)
