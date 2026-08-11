@@ -108,7 +108,7 @@
                  ("<return>" . nil))) ; multicursor use enter for newline, ctrl + g to exit
 
 ;; themes/configs?
-
+(setf completion-styles '(basic flex))           ; fuzzy completions in M-x
 (setq confirm-kill-emacs nil)
 (setq doom-theme 'doom-dark+)
 (setq tab-width 4)
@@ -171,11 +171,17 @@
     "C--" #'+fold/close                           ; fold
     "C-*" #'+fold/open-all                        ; C-S-+ unfold all
     "C-_" #'+fold/close-all                       ; C-S-- fold all
-    "S-<right>" #'split-window-horizontally       ; split window horizontally
     "C-w" nil                                     ; disable C-w binding (deletes all above)
+    "C-w h" #'split-window-horizontally           ; split window horizontally
     "M-a" #'my-align-regexp                       ; align chars in selection
     "M-d" #'+lookup/documentation                 ; open new buffer with documentation of current symbol
     "M-g" #'magit                                 ; open magit
+    "C-c b k" #'magit-kill-this-buffer                  ; kill current buffer
+    )
+(map!
+    :map corfu-popupinfo-map
+    "S-<down>" #'corfu-popupinfo-scroll-up        ; scroll corfu descriptions
+    "S-<up>"   #'corfu-popupinfo-scroll-down      ;
     )
 (map!
   :map undo-fu-mode-map
@@ -188,8 +194,11 @@
         [escape] #'corfu-quit))                ; let ESC close the corfu popup
 (with-eval-after-load 'treemacs
     (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action) ; treemacs fold/unfold in one click
-    (treemacs-follow-mode))                                                        ; highlight the current file in tree
-
+    (treemacs-follow-mode)                                                         ; highlight the current file in tree
+    (map! :map treemacs-mode-map
+        "p c" #'treemacs-remove-project-from-workspace  ; p c in treemacs removes project from sidebar
+        )
+    )
 ;; helper functions
 (defun format-or-indent-region (beg end)
   "Format the region with Eglot, falling back to `indent-region'.
@@ -264,3 +273,9 @@ major mode's indentation rules."
 
 (add-hook 'post-command-hook #'my-region-whitespace-refresh)
 ;; end whitespace visualizer
+
+
+(add-hook 'completion-at-point-functions #'cape-dabbrev)   ; complete abbrev from current buffers
+(add-hook 'completion-at-point-functions #'cape-abbrev)    ; complete abbrev
+(add-hook 'completion-at-point-functions #'cape-file)      ; suggest filenames
+(add-hook 'completion-at-point-functions #'yasnippet-capf) ; suggest snippets
