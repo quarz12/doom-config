@@ -185,6 +185,7 @@
     "C-_" #'+fold/close-all                       ; C-S-- fold all
     "C-w" nil                                     ; disable C-w binding (deletes all above)
     "C-w h" #'split-window-horizontally           ; split window horizontally
+    "C-w c" #'+workspace/close-window-or-workspace; close window
     "M-a" #'my-align-regexp                       ; align chars in selection
     "M-g" #'magit                                 ; open magit
     "C-c b k" #'magit-kill-this-buffer            ; kill current buffer
@@ -192,9 +193,6 @@
     "C-<tab>" #'next-window-any-frame             ; switch to the next window
     "C-<iso-lefttab>" #'previous-window-any-frame ; switch to previous window
     )
-(with-eval-after-load 'smartparens
-    (define-key smartparens-mode-map (kbd "C-M-f") nil)
-    (define-key smartparens-mode-map (kbd "C-M-d") nil))
 (map!
     :map corfu-popupinfo-map
     "S-<down>" #'corfu-popupinfo-scroll-up        ; scroll corfu descriptions
@@ -206,6 +204,10 @@
 (map!
     :map +dashboard-mode-map
   "C-p" #'treemacs-projectile) ; another one
+(with-eval-after-load 'smartparens
+    (define-key smartparens-mode-map (kbd "C-M-f") nil)
+    (define-key smartparens-mode-map (kbd "C-M-d") nil)
+    (define-key smartparens-mode-map (kbd "C-M-u") nil))
 (after! corfu
   (map! :map corfu-map
         [escape] #'corfu-quit))                ; let ESC close the corfu popup
@@ -298,3 +300,6 @@ major mode's indentation rules."
 (add-hook 'completion-at-point-functions #'yasnippet-capf) ; suggest snippets
 
 (remove-hook '+dashboard-functions #'+dashboard-widget-shortmenu) ; remove options from dashboard
+
+
+; bear -- make to generate compile_commands.json
