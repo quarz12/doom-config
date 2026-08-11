@@ -124,8 +124,17 @@
         (define-key treemacs-mode-map [mouse-1] #'treemacs-single-click-expand-action)) ; single click to open file
     (setq treemacs-width 25)
 )
-(global-visual-line-mode t)    ; word wrap mode
+(global-visual-line-mode t)     ; word wrap mode
 (setq-default show-trailing-whitespace t)
+(setq comment-style 'plain)     ; start comments at linestart
+(add-hook 'c-ts-mode-hook
+          (lambda ()
+            (setq comment-start "// "
+                comment-end ""))) ; use // to comment in c-ts-mode (tree-sitter)
+(add-hook 'c-mode-hook
+          (lambda ()
+            (setq comment-start "// "
+                comment-end ""))) ; use // to comment in c-mode
 
 ;; TODO minimap causes cursor and statusbar flickers when swapping between multiple windows
 (minimap-mode 1)
@@ -144,6 +153,7 @@
               (display-line-numbers-mode -1))))
 (setq auto-save-visited-interval 2)
 (auto-save-visited-mode 1)  ; autosave after 2 seconds
+
 
 ;; keybinds
 
@@ -176,8 +186,13 @@
     "M-a" #'my-align-regexp                       ; align chars in selection
     "M-d" #'+lookup/documentation                 ; open new buffer with documentation of current symbol
     "M-g" #'magit                                 ; open magit
-    "C-c b k" #'magit-kill-this-buffer                  ; kill current buffer
+    "C-c b k" #'magit-kill-this-buffer            ; kill current buffer
+    "C-M-f" #'+default/search-project             ; project search
+    "C-<tab>" #'next-window-any-frame             ; switch to the next window
+    "C-<iso-lefttab>" #'previous-window-any-frame
     )
+(with-eval-after-load 'smartparens
+  (define-key smartparens-mode-map (kbd "C-M-f") nil))
 (map!
     :map corfu-popupinfo-map
     "S-<down>" #'corfu-popupinfo-scroll-up        ; scroll corfu descriptions
@@ -279,3 +294,4 @@ major mode's indentation rules."
 (add-hook 'completion-at-point-functions #'cape-abbrev)    ; complete abbrev
 (add-hook 'completion-at-point-functions #'cape-file)      ; suggest filenames
 (add-hook 'completion-at-point-functions #'yasnippet-capf) ; suggest snippets
+
