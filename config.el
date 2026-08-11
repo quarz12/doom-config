@@ -160,12 +160,14 @@
 (map! :g ;;NOTE commented lines are defaults
     "C-y" #'undo-fu-only-redo                     ; C-y redo
     "C-a" #'mark-whole-buffer                     ; select the whole file
+    "C-r" #'eglot-rename                          ; rename variable
     "C-#" #'comment-line                          ; comment line(s)
     "C-M-l" #'eglot-format                        ; format file with lsp
     "<backtab>" #'my-indent-rigidly               ; enter shifting mode
-    "C-M-d" #'+lookup/definition                  ; jump to definition
+    "M-d" #'+lookup/documentation                 ; open new buffer with documentation of current symbol
+    "C-M-d" #'xref-find-definitions               ; jump to definition
     "C-M-i" #'+lookup/implementations             ; jump to implementation
-    "C-M-u" #'+lookup/references                  ; jump to usages
+    "C-M-u" #'xref-find-references                ; jump to usages
     ;; "M-,"                                      ; jump backwards
     ;; "C-M-,"                                    ; jump forwards
     "C-M-l" #'format-or-indent-region             ; format using eglot, fallback to autoindent
@@ -184,15 +186,15 @@
     "C-w" nil                                     ; disable C-w binding (deletes all above)
     "C-w h" #'split-window-horizontally           ; split window horizontally
     "M-a" #'my-align-regexp                       ; align chars in selection
-    "M-d" #'+lookup/documentation                 ; open new buffer with documentation of current symbol
     "M-g" #'magit                                 ; open magit
     "C-c b k" #'magit-kill-this-buffer            ; kill current buffer
     "C-M-f" #'+default/search-project             ; project search
     "C-<tab>" #'next-window-any-frame             ; switch to the next window
-    "C-<iso-lefttab>" #'previous-window-any-frame
+    "C-<iso-lefttab>" #'previous-window-any-frame ; switch to previous window
     )
 (with-eval-after-load 'smartparens
-  (define-key smartparens-mode-map (kbd "C-M-f") nil))
+    (define-key smartparens-mode-map (kbd "C-M-f") nil)
+    (define-key smartparens-mode-map (kbd "C-M-d") nil))
 (map!
     :map corfu-popupinfo-map
     "S-<down>" #'corfu-popupinfo-scroll-up        ; scroll corfu descriptions
@@ -295,3 +297,4 @@ major mode's indentation rules."
 (add-hook 'completion-at-point-functions #'cape-file)      ; suggest filenames
 (add-hook 'completion-at-point-functions #'yasnippet-capf) ; suggest snippets
 
+(remove-hook '+dashboard-functions #'+dashboard-widget-shortmenu) ; remove options from dashboard
