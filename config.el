@@ -301,5 +301,11 @@ major mode's indentation rules."
 
 (remove-hook '+dashboard-functions #'+dashboard-widget-shortmenu) ; remove options from dashboard
 
+(defun my-hide-ctrl-m ()
+  "Hide ^M characters in the current buffer's display."    ; hide \r in mixed newline files
+  (setq buffer-display-table (make-display-table))
+  (aset buffer-display-table ?\^M []))
+
+(add-hook 'find-file-hook #'my-hide-ctrl-m)
 
 ; bear -- make to generate compile_commands.json
